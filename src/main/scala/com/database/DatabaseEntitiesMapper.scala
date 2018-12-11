@@ -1,22 +1,19 @@
 package com.database
 
-import com.shop.domain.{Order, Product, Stock}
+import com.shop.domain
+import com.shop.domain.{Flight, Reservation, Seats}
 
 trait DatabaseEntitiesMapper {
 
-	def stockEntityToStock(stockEntity: StockEntity): Stock = {
-		Stock(stockEntity.products.map(stockProductEntityToProduct))
+	def reservationEntityToReservation(reservationEntity: ReservationEntity): Reservation = {
+		domain.Reservation(reservationEntity.id, reservationEntity.timestamp, reservationEntity.seats.map(seatsEntityToSeats))
 	}
 
-	def stockProductEntityToProduct(stockProductEntity: StockProductEntity): Product = {
-		Product(stockProductEntity.product.name, stockProductEntity.product.barCode, stockProductEntity.amount)
+	def seatsEntityToSeats(seatsEntity: SeatsEntity): Seats = {
+		Seats(seatsEntity.id, seatsEntity.isBooked)
 	}
 
-	def orderProductEntityToProduct(orderProductEntity: OrderProductEntity): Product = {
-		Product(orderProductEntity.product.name, orderProductEntity.product.barCode, orderProductEntity.amount)
-	}
-
-	def orderEntityToOrder(orderEntity: OrderEntity): Order = {
-		Order(orderEntity.products.map(orderProductEntityToProduct), Some(orderEntity.timestamp))
+	def flightEntityToFlight(flightEntity: FlightEntity): Flight = {
+		domain.Flight(flightEntity.id, flightEntity.seats.map(seatsEntityToSeats))
 	}
 }

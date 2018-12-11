@@ -1,7 +1,10 @@
 package com.shop.domain
 
-final case class Stock(products: Seq[Product])
+import java.time.LocalDateTime
 
-final case class Order(products: Seq[Product], id: Option[Long])
 
-final case class Product(name: String, barCode: Int, amount: Int)
+final case class Reservation(id: Long, timestamp: LocalDateTime, seats: List[Seats])
+
+final case class Seats(id: Long, isBooked: Boolean)
+
+final case class Flight(id: Long, seats: List[Seats])

@@ -1,54 +1,43 @@
 package com.database
 
-import com.shop.domain.{Order, Product, Stock}
+import java.time.LocalDateTime
+import scala.language.postfixOps
 
 trait WithId {
-	def id: Long
+  def id: Long
 }
 
-final case class StockEntity(id: Long, products: Seq[StockProductEntity]) extends WithId
+final case class ReservationEntity(id: Long, timestamp: LocalDateTime, seats: List[SeatsEntity]) extends WithId
 
-final case class OrderEntity(id: Long, timestamp: Long, products: Seq[OrderProductEntity]) extends WithId
+final case class SeatsEntity(id: Long, isBooked: Boolean) extends WithId
 
-final case class ProductEntity(id: Long, barCode: Int, name: String) extends WithId
+final case class FlightEntity(id: Long, seats: List[SeatsEntity]) extends WithId
 
-final case class OrderProductEntity(id: Long, product: ProductEntity, amount: Int) extends WithId
-
-final case class StockProductEntity(id: Long, product: ProductEntity, amount: Int) extends WithId
 
 class Database(
-	              private var productsEntities: List[ProductEntity] = List(ProductEntity(1, 100, "coś"), ProductEntity(2, 200, "inne")),
-	              private var stockEntity: StockEntity = StockEntity(1, List(StockProductEntity(1, ProductEntity(1, 100, "coś"), 20), StockProductEntity(2, ProductEntity(2, 200, "inne"), 30))),
-	              private var ordersEntities: List[OrderEntity] = List[OrderEntity]()) extends DatabaseEntitiesMapper {
+                private var seatsEntities: List[SeatsEntity] = (1 to 10).map(id => SeatsEntity(id, isBooked = false)) toList,
+                private var flightEntitities: List[FlightEntity] = List(FlightEntity(1, (1 to 10).map(id => SeatsEntity(id, isBooked = false)) toList)),
+                private var reservationEntities: List[ReservationEntity] = List[ReservationEntity]()
 
-	def findStockProductByBarCode(barCode: Int): Option[Product] = stockEntity.products.find(entity => entity.product.barCode == barCode)
-		.map(stockProductEntityToProduct)
+              ) {
+  def bookSeat(seatId: Long) = {
+    val seat = seatsEntities.find(_.id == seatId).get
+    SeatsEntity(seat.id, true)
+  }
 
-	def findOrder(id: Long): Option[Order] = ordersEntities.find(_.timestamp == id).map(orderEntityToOrder)
+  def createReservation(seats: List[SeatsEntity]): ReservationEntity = {
+    val seatsBooked = seats.map(seat => bookSeat(seat.id))
+    ReservationEntity(findNextDatabaseId(reservationEntities), LocalDateTime.now(), seatsBooked)
+  }
 
-	def findStock(): Stock = stockEntityToStock(stockEntity)
+  def findReservation(reservationId: Long): Unit = {
+    reservationEntities.find(_.id == reservationId).get
+  }
 
-	def saveOrder(order: Order): Order = {
-		val id = findNextDatabaseId(ordersEntities)
-		val orderProducts = for {
-			product <- order.products
-			productEntity <- productsEntities.find(_.barCode == product.barCode)
-		} yield OrderProductEntity(productEntity.id, productEntity, product.amount)
-		val orderEntity = OrderEntity(id, order.id.get, orderProducts)
-		ordersEntities = orderEntity :: ordersEntities
-		orderEntityToOrder(orderEntity)
-	}
+  def findFlight(flightId: Long): Unit = {
+    flightEntitities.find(_.id == flightId).get
+  }
 
-	def updateStock(stock: Stock): Stock = {
-		val updatedStock = for {
-			stockProduct <- stockEntity.products
-			product <- stock.products.find(_.barCode == stockProduct.product.barCode)
-		} yield StockProductEntity(stockProduct.id, stockProduct.product, product.amount)
-
-		stockEntity = StockEntity(stockEntity.id, updatedStock)
-		stockEntityToStock(stockEntity)
-	}
-
-	private def findNextDatabaseId(list: List[WithId]) =
-		if (list.isEmpty) 0L else list.maxBy(_.id).id + 1
+  private def findNextDatabaseId(list: List[WithId]) =
+    if (list.isEmpty) 0L else list.maxBy(_.id).id + 1
 }
