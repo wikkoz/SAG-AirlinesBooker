@@ -1,8 +1,7 @@
 package com
 
 import akka.actor.{ActorRef, ActorSystem, Props}
-import com.database.Database
-import com.shop.logic.{ShopActor, ShopService}
+import com.shop.logic.{AirlineActor, ShopService}
 
 import scala.concurrent.ExecutionContext
 
@@ -11,8 +10,7 @@ trait DependencyWiring {
 
 	def executionContext: ExecutionContext
 
-	val database = new Database()
-	val shopActor: ActorRef = system.actorOf(Props(new ShopActor(database)), "shopActor")
+	val shopActor: ActorRef = system.actorOf(Props(new AirlineActor(database)), "shopActor")
 
 	lazy val shopService: ShopService = new ShopService(shopActor)
 }

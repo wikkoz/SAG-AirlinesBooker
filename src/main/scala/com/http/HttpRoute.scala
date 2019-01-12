@@ -7,7 +7,7 @@ import com.shop.api.ShopRoutes
 
 trait HttpRoute extends ShopRoutes {
 
-	def system: ActorSystem
+	def actor: ActorSystem
 
 	val route: Route =
 		pathPrefix("api") {

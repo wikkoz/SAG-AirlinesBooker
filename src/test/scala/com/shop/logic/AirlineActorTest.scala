@@ -8,7 +8,7 @@ import akka.testkit.TestKit
 import akka.util.Timeout
 import com.database.{Database, ProductEntity, StockEntity, StockProductEntity}
 import com.shop.domain.{Order, Product, Stock}
-import com.shop.logic.ShopActor.{Buy, GetOrder, GetStock}
+import com.shop.logic.AirlineActor.{Buy, GetOrder, GetStock}
 import org.scalatest.{BeforeAndAfterEach, WordSpecLike}
 
 import scala.concurrent.Await
@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class ShopActorTest(_system: ActorSystem) extends TestKit(_system) with WordSpecLike with BeforeAndAfterEach {
+class AirlineActorTest(_system: ActorSystem) extends TestKit(_system) with WordSpecLike with BeforeAndAfterEach {
 
 	def this() = this(ActorSystem("ShopActorTestSpec"))
 
@@ -27,7 +27,7 @@ class ShopActorTest(_system: ActorSystem) extends TestKit(_system) with WordSpec
 	override def beforeEach() {
 		val database = new Database(List(ProductEntity(1, 100, "meat")),
 			StockEntity(1, List(StockProductEntity(1, ProductEntity(1, 100, "meat"), 30))))
-		shopActor = system.actorOf(Props(new ShopActor(database)))
+		shopActor = system.actorOf(Props(new AirlineActor(database)))
 	}
 
 	"A shop" when {

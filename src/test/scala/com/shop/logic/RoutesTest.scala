@@ -7,7 +7,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
 import com.shop.api.ShopRoutes
 import com.shop.domain.{Order, Product, Stock}
-import com.shop.logic.ShopActor.{Buy, GetOrder, GetStock}
+import com.shop.logic.AirlineActor.{Buy, GetOrder, GetStock}
 import com.shop.logic.exception.ValidationException
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
