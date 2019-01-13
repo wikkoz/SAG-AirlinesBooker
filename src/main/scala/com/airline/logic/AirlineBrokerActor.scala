@@ -15,7 +15,7 @@ object AirlineBrokerActor {
 
   final case class GetRequest(request: AirlineBrokerRequest)
 
-  def props: Props = Props(new AirlineBrokerActor(Map.empty))
+  def props: Map[String, ActorRef] => Props = (airlineActors: Map[String, ActorRef]) => Props(new AirlineBrokerActor(airlineActors))
 }
 
 class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor with ActorLogging {
@@ -33,8 +33,6 @@ class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor wit
           }
         case None => sender ! new RuntimeException("Airline not found")
       }
-
-      context.stop(self);
   }
 
   private def askForAvailableTickets(airline: ActorRef): Future[List[Flight]] = {

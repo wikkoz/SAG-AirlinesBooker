@@ -2,7 +2,7 @@ package com.airline.logic
 
 import java.time.LocalDateTime
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, Props}
 import com.airline.domain._
 import com.airline.logic.AirlineActor.{GetAvailableTickets, ReserveTicket}
 
@@ -14,6 +14,7 @@ object AirlineActor {
 
   final case class GetAvailableTickets()
 
+  def props: String => Props = (airlineName: String) => Props(new AirlineActor(airlineName))
 }
 
 class AirlineActor(airlineName: String) extends Actor with ActorLogging {
@@ -46,12 +47,12 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
   private def reserveTicket(ticket: Ticket): Try[BigDecimal] = {
     flights.find(f => f.flightId == ticket.flightId)
       .map(f => checkAndBookSeats(ticket, f)
-        match {
-          case Success((flight, price)) =>
-            updateFlights(flight)
-            Success(price)
-          case Failure(error) => Failure(error)
-        })
+      match {
+        case Success((flight, price)) =>
+          updateFlights(flight)
+          Success(price)
+        case Failure(error) => Failure(error)
+      })
       .getOrElse(Failure(new IllegalArgumentException(s"Cannot find flight with id: ${ticket.flightId} ")))
   }
 
@@ -66,7 +67,7 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
 
     val updatedSeats = flight.seats
       .map(seat => if (ticketSeats.exists(ts => ts.position == seat.position)) {
-        Seat(seat.position, true, seat.price)
+        Seat(seat.position, isBooked = true, seat.price)
       } else {
         seat
       })
@@ -78,7 +79,7 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
     Success(updatedFlight, price)
   }
 
-  private def updateFlights(flight: Flight) : Unit = {
-    flights = flights.map(f => if(f.flightId == flight.flightId) flight else f)
+  private def updateFlights(flight: Flight): Unit = {
+    flights = flights.map(f => if (f.flightId == flight.flightId) flight else f)
   }
 }
