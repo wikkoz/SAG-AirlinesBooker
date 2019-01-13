@@ -34,16 +34,17 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
   }
 
   "An Airlines route" when {
-    val ticket: Ticket = Ticket(List(1, 2, 3), 123)
-    val ticketJsonString = "{\n\"seats\": [1,2,3],\n\"flightId\": 123\n}"
-    val request = HttpRequest(
-      method = HttpMethods.POST,
-      uri = "/0/id/book",
-      entity = HttpEntity(ContentTypes.`application/json`, ticketJsonString)
-    )
-
     "called booking tickets POST" should {
+      val ticket: Ticket = Ticket(List(1, 2, 3), 123)
+      val ticketJsonString = "{\n\"seats\": [1,2,3],\n\"flightId\": 123\n}"
+      val ticketHttpEntity = HttpEntity(ContentTypes.`application/json`, ticketJsonString)
+
       "successfully book seats in specified plane" in {
+        val request = HttpRequest(
+          method = HttpMethods.POST,
+          uri = "/0/id/book",
+          entity = ticketHttpEntity
+        )
         val result = request ~> routes ~> runRoute
 
         check {
@@ -55,6 +56,11 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
       }
 
       "called with bad broker id" in {
+        val request = HttpRequest(
+          method = HttpMethods.POST,
+          uri = "/100/id/book",
+          entity = ticketHttpEntity
+        )
         val result = request ~> routes ~> runRoute
 
         check {
@@ -63,6 +69,11 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
       }
 
       "called with unknown airplane name" in {
+        val request = HttpRequest(
+          method = HttpMethods.POST,
+          uri = "/0/id0/book",
+          entity = ticketHttpEntity
+        )
         val result = request ~> routes ~> runRoute
 
         check {
