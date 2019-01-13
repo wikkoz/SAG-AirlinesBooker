@@ -6,7 +6,7 @@ import com.airline.logic.{AirlineActor, AirlineBrokerActor}
 import scala.concurrent.ExecutionContext
 
 trait DependencyWiring {
-  final val airlines: List[String] = List("first", "second", "third")
+  private final val airlines: List[String] = List("first", "second", "third")
 
   private def initAirlineBrokersActors(n: Int): Map[Int, ActorRef] = {
     Array.range(0, n)
@@ -28,5 +28,5 @@ trait DependencyWiring {
 
   def executionContext: ExecutionContext
 
-  val airlineBrokers: Map[Int, ActorRef] = initAirlineBrokersActors(4)
+  final val airlineBrokers: Map[Int, ActorRef] = initAirlineBrokersActors(4)
 }
