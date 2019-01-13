@@ -65,19 +65,6 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
           status should ===(StatusCodes.NotFound)
         }(result)
       }
-
-      "called with unknown airplane name" in {
-        val request = HttpRequest(
-          method = HttpMethods.POST,
-          uri = "/0/id0/book",
-          entity = ticketHttpEntity
-        )
-        val result = request ~> routes ~> runRoute
-
-        check {
-          status should ===(StatusCodes.NotFound)
-        }(result)
-      }
     }
   }
 }
