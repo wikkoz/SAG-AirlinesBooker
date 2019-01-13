@@ -1,14 +1,14 @@
-package com.shop.logic
+package com.airline.logic
 
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
-import com.shop.api.ShopRoutes
-import com.shop.domain.{Order, Product, Stock}
-import com.shop.logic.AirlineActor.{Buy, GetOrder, GetStock}
-import com.shop.logic.exception.ValidationException
+import com.airline.api.AirlineRouter
+import com.airline.domain.{Order, Product, Stock}
+import com.airline.logic.AirlineActor.{Buy, GetOrder, GetStock}
+import com.airline.logic.exception.ValidationException
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 
@@ -18,7 +18,7 @@ import scala.util.{Failure, Success}
 
 
 class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
-	with ShopRoutes with Matchers with ScalatestRouteTest {
+	with AirlineRouter with Matchers with ScalatestRouteTest {
 
 	lazy val routes: Route = shopRoutes
 

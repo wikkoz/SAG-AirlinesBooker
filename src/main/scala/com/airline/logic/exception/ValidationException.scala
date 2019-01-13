@@ -1,3 +1,3 @@
-package com.shop.logic.exception
+package com.airline.logic.exception
 
 class ValidationException(message: String) extends RuntimeException(message) {}

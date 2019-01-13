@@ -1,16 +1,15 @@
-package com.shop.api
+package com.airline.api
 
+import akka.actor.ActorRef
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, Route}
-import com.shop.domain.{Order, Stock}
-import com.shop.logic.ShopService
-import com.shop.logic.exception.ValidationException
+import com.airline.logic.exception.ValidationException
 
 import scala.concurrent.Future
 
-trait ShopRoutes extends JsonSupport {
-	def shopService: ShopService
+trait AirlineRouter extends JsonSupport {
+	def airlineBrokers: Map[Int, ActorRef]
 
 	val buyExceptionHandler = ExceptionHandler {
 		case e: ValidationException =>

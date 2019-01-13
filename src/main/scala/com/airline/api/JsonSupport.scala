@@ -1,7 +1,7 @@
-package com.shop.api
+package com.airline.api
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.shop.domain.{Order, Product, Stock}
+import com.airline.domain.{Order, Product, Stock}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {

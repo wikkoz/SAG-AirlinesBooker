@@ -1,10 +1,10 @@
-package com.shop.logic
+package com.airline.logic
 
 import java.time.LocalDateTime
 
 import akka.actor.{Actor, ActorLogging}
-import com.shop.domain._
-import com.shop.logic.AirlineActor.{GetAvailableTickets, ReserveTicket}
+import com.airline.domain._
+import com.airline.logic.AirlineActor.{GetAvailableTickets, ReserveTicket}
 
 import scala.util.{Failure, Random, Success, Try}
 
