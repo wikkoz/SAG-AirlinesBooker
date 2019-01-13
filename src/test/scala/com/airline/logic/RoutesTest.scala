@@ -1,113 +1,74 @@
 package com.airline.logic
 
-import akka.http.scaladsl.marshalling.Marshal
+import akka.actor.ActorRef
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
 import com.airline.api.AirlineRouter
-import com.airline.domain.{Order, Product, Stock}
-import com.airline.logic.AirlineActor.{Buy, GetOrder, GetStock}
-import com.airline.logic.exception.ValidationException
+import com.airline.domain.{AirlineBrokerRequest, BookTicketCommand, Ticket}
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 
 class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
-	with AirlineRouter with Matchers with ScalatestRouteTest {
+  with AirlineRouter with Matchers with ScalatestRouteTest {
 
-	lazy val routes: Route = shopRoutes
+  lazy val routes: Route = airlineRoutes
 
-	override def shopService: ShopService = new ShopService(shopActor.ref)
+  //  var airlineActor: AirlineActor = new AirlineActor("id")
+  var airlineActors: Map[String, ActorRef] = _
+  //  var airlineBroker: AirlineBrokerActor = new AirlineBrokerActor(airlineActors)
 
-	var shopActor: TestProbe = _
+  override def airlineBrokers: Map[Int, ActorRef] = Map.apply(0 -> airlineBroker.ref)
 
-	override def beforeEach() {
-		shopActor = TestProbe()
-	}
+  var airlineActor: TestProbe = _
+  var airlineBroker: TestProbe = _
 
-	"A ShopRoutes" when {
-		"called GET (/shop) " should {
-			"return stock from ShopActor" in {
-				val request = HttpRequest(uri = "/shop")
-				val stock = Stock(List(Product("meat", 100, 20)))
-				val result = request ~> routes ~> runRoute
-				shopActor.expectMsg(0 second, GetStock())
-				shopActor.reply(stock)
+  override def beforeEach() {
+    airlineActor = TestProbe()
+    airlineActors = Map("id" -> airlineActor.ref)
+    airlineBroker = TestProbe()
+  }
 
-				check {
-					status should ===(StatusCodes.OK)
-					contentType should ===(ContentTypes.`application/json`)
-					entityAs[String] shouldEqual """{"products":[{"name":"meat","barCode":100,"amount":20}]}"""
-				}(result)
+  "An Airlines route" when {
+    val ticket: Ticket = Ticket(List(1, 2, 3), 123)
+    val ticketJsonString = "{\n\"seats\": [1,2,3],\n\"flightId\": 123\n}"
+    val request = HttpRequest(
+      method = HttpMethods.POST,
+      uri = "/0/id/book",
+      entity = HttpEntity(ContentTypes.`application/json`, ticketJsonString)
+    )
 
-			}
-		}
-		"called GET (/shop/order) " should {
-			"return order when there is an order with id" in {
-				val request = HttpRequest(uri = "/shop/order/1")
-				val order = Success(Order(List(Product("meat", 100, 20)), Some(1L)))
-				val result = request ~> routes ~> runRoute
-				shopActor.expectMsg(0 second, GetOrder(1))
-				shopActor.reply(order)
+    "called booking tickets POST" should {
+      "successfully book seats in specified plane" in {
+        val result = request ~> routes ~> runRoute
 
-				check {
-					status should ===(StatusCodes.OK)
-					contentType should ===(ContentTypes.`application/json`)
-					entityAs[String] shouldEqual """{"products":[{"name":"meat","barCode":100,"amount":20}],"id":1}"""
-				}(result)
+        check {
+          status should ===(StatusCodes.Created)
+        }(result)
 
-			}
-		}
-		"called GET (/shop/order) " should {
-			"return exception when there is no order with id" in {
-				val request = HttpRequest(uri = "/shop/order/1")
-				val order = Failure(new ValidationException("There is no order with id 1"))
-				val result = request ~> routes ~> runRoute
-				shopActor.expectMsg(0 second, GetOrder(1))
-				shopActor.reply(order)
+        val expectedAirlineBrokerMsg = AirlineBrokerRequest("id", BookTicketCommand(ticket))
+        airlineBroker.expectMsg(expectedAirlineBrokerMsg)
+      }
 
-				check {
-					status should ===(StatusCodes.UnprocessableEntity)
-				}(result)
-			}
-		}
-		"called POST (/shop/buy) " should {
-			"return the order when there is no validation errors" in {
-				val order = Order(List(Product("meat", 100, 20)), Some(1L))
-				val orderEntity = Marshal(order).to[MessageEntity].futureValue
-				val request = HttpRequest(uri = "/shop/buy", method = HttpMethods.POST).withEntity(orderEntity)
-				val result = request ~> routes ~> runRoute
-				shopActor.expectMsg(0 second, Buy(order))
-				shopActor.reply(Success(order))
+      "called with bad broker id" in {
+        val result = request ~> routes ~> runRoute
 
-				check {
-					status should ===(StatusCodes.OK)
-					contentType should ===(ContentTypes.`application/json`)
-					entityAs[String] shouldEqual """{"products":[{"name":"meat","barCode":100,"amount":20}],"id":1}"""
-				}(result)
-			}
-		}
+        check {
+          status should ===(StatusCodes.NotFound)
+        }(result)
+      }
 
-		"called POST (/shop/buy) " should {
-			"return exception when there is validation error" in {
-				val order = Order(List(Product("meat", 100, 20)), Some(1L))
-				val orderEntity = Marshal(order).to[MessageEntity].futureValue
-				val request = HttpRequest(uri = "/shop/buy", method = HttpMethods.POST).withEntity(orderEntity)
-				val result = request ~> routes ~> runRoute
-				shopActor.expectMsg(0 second, Buy(order))
-				shopActor.reply(Failure(new ValidationException("There is no meat on stock")))
+      "called with unknown airplane name" in {
+        val result = request ~> routes ~> runRoute
 
-				check {
-					status should ===(StatusCodes.UnprocessableEntity)
-				}(result)
-			}
-		}
-	}
-
-
+        check {
+          status should ===(StatusCodes.NotFound)
+        }(result)
+      }
+    }
+  }
 }
