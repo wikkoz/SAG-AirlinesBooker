@@ -11,6 +11,6 @@ trait HttpRoute extends AirlineRouter {
 
 	val route: Route =
 		pathPrefix("api") {
-			shopRoutes
+			airlineRoutes
 		}
 }

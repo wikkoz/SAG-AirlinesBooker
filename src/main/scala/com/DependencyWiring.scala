@@ -9,6 +9,4 @@ trait DependencyWiring {
 	def system: ActorSystem
 
 	def executionContext: ExecutionContext
-
-	val shopActor: ActorRef = system.actorOf(Props(new AirlineActor()), "shopActor")
 }

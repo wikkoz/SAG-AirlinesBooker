@@ -5,11 +5,11 @@ import java.time.LocalDateTime
 
 final case class Ticket(seats: List[Int], flightId: Int)
 
-final case class Seat(position: Int, isBooked: Boolean, price:BigDecimal)
+final case class Seat(position: Int, isBooked: Boolean, price: BigDecimal)
 
 final case class Flight(flightId: Int, seats: List[Seat], departureCity: City.Value, destinationCity: City.Value, departureTime: LocalDateTime)
 
-case class AirlineCommand()
+abstract class AirlineCommand()
 
 final case class GetFlightsCommand() extends AirlineCommand()
 
