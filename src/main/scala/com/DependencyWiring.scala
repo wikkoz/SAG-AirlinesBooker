@@ -10,17 +10,17 @@ trait DependencyWiring {
 
   private def initAirlineBrokersActors(n: Int): Map[Int, ActorRef] = {
     Array.range(0, n)
-      .map(i => Tuple2(i, getAirlineBroker(i, "AirlineBrokerActor" + i)))
+      .map(i => Tuple2(i, getAirlineBroker(i)))
       .toMap
   }
 
-  private def getAirlineBroker(i: Int, name: String): ActorRef = {
-    system.actorOf(AirlineBrokerActor.props(getAirlinesActors(i)), name)
+  private def getAirlineBroker(i: Int): ActorRef = {
+    system.actorOf(AirlineBrokerActor.props(getAirlinesActors(i)))
   }
 
   private def getAirlinesActors(i: Int): Map[String, ActorRef] = {
     airlines
-      .map(airline => Tuple2(airline, system.actorOf(AirlineActor.props("AirlineActor_" + airline + i))))
+      .map(airline => Tuple2(airline, system.actorOf(AirlineActor.props(airline))))
       .toMap
   }
 
