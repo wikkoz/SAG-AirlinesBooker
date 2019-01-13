@@ -2,7 +2,7 @@ package com.airline.logic
 
 import java.util.concurrent.{Executors, TimeUnit}
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import com.airline.domain._
@@ -14,6 +14,8 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Futu
 object AirlineBrokerActor {
 
   final case class GetRequest(request: AirlineBrokerRequest)
+
+  def props: Props = Props(new AirlineBrokerActor(Map.empty))
 }
 
 class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor with ActorLogging {
@@ -31,6 +33,8 @@ class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor wit
           }
         case None => sender ! new RuntimeException("Airline not found")
       }
+
+      context.stop(self);
   }
 
   private def askForAvailableTickets(airline: ActorRef): Future[List[Flight]] = {
