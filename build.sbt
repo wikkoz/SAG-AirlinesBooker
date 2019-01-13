@@ -8,7 +8,7 @@ val ngBuild = taskKey[Int]("cd; ng build -prod -aot.")
 
 lazy val root = (project in file(".")).
   settings(
-    name            := "Shop",
+    name            := "Airlines",
     version         := "0.1",
     licenses        := Seq("Unlicense" -> new URL("http://unlicense.org/")),
     organization    := "net.creasource",
