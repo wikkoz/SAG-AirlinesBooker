@@ -2,7 +2,7 @@ package com.airline.api
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{complete, _}
 import akka.http.scaladsl.server.Route
 import com.airline.domain.{AirlineBrokerRequest, BookTicketCommand, Ticket}
 
@@ -18,8 +18,11 @@ trait AirlineRouter extends JsonSupport {
               post {
                 entity(as[Ticket]) { ticket =>
                   airlineBrokers.get(brokerId)
-                    .foreach(brokerRef => brokerRef.tell(AirlineBrokerRequest(lineId, BookTicketCommand(ticket)), brokerRef))
-                  complete(StatusCodes.Created)
+                    .map(brokerRef => brokerRef.tell(AirlineBrokerRequest(lineId, BookTicketCommand(ticket)), brokerRef))
+                  match {
+                    case Some(_) => complete(StatusCodes.Created)
+                    case None => complete(StatusCodes.NotFound)
+                  }
                 }
               }
             }

@@ -18,9 +18,7 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
 
   lazy val routes: Route = airlineRoutes
 
-  //  var airlineActor: AirlineActor = new AirlineActor("id")
   var airlineActors: Map[String, ActorRef] = _
-  //  var airlineBroker: AirlineBrokerActor = new AirlineBrokerActor(airlineActors)
 
   override def airlineBrokers: Map[Int, ActorRef] = Map.apply(0 -> airlineBroker.ref)
 
