@@ -23,7 +23,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-slf4j"           % akkaVersion,
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8",
       "ch.qos.logback"    %  "logback-classic"      % "1.2.3",
-
+      "com.github.scopt" %% "scopt" % "3.7.0",
 
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,

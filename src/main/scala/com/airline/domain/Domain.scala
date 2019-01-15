@@ -15,7 +15,7 @@ final case class GetFlightsCommand() extends AirlineCommand()
 
 final case class BookTicketCommand(ticket: Ticket) extends AirlineCommand
 
-final case class AirlineBrokerRequest(airline: String, command: AirlineCommand)
+final case class AirlineBrokerRequest(airline: Int, command: AirlineCommand)
 
 
 object City extends Enumeration {

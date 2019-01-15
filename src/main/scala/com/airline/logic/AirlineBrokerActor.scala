@@ -16,13 +16,13 @@ object AirlineBrokerActor {
 
   final case class GetRequest(request: AirlineBrokerRequest)
 
-  def props: Map[String, ActorRef] => Props = (airlineActors: Map[String, ActorRef]) => Props(new AirlineBrokerActor(airlineActors))
+  def props: (Map[Int, ActorRef], Int) => Props = (airlineActors: Map[Int, ActorRef], threads: Int) => Props(new AirlineBrokerActor(airlineActors, threads))
 }
 
-class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor with ActorLogging {
+class AirlineBrokerActor(airlineActors: Map[Int, ActorRef], threads: Int) extends Actor with ActorLogging {
 
   implicit lazy val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
-  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(10))
+  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(threads))
 
   override def receive: Receive = {
     case GetRequest(request: AirlineBrokerRequest) =>

@@ -5,12 +5,15 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
+import com.Config
 import com.airline.api.AirlineRouter
 import com.airline.domain.{AirlineBrokerRequest, BookTicketCommand, Ticket}
+import com.airline.logic.AirlineBrokerActor.GetRequest
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.language.postfixOps
+import scala.util.Success
 
 
 class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
@@ -18,16 +21,16 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
 
   lazy val routes: Route = airlineRoutes
 
-  var airlineActors: Map[String, ActorRef] = _
+  var airlineActors: Map[Int, ActorRef] = _
 
   override def airlineBrokers: Map[Int, ActorRef] = Map.apply(0 -> airlineBroker.ref)
-
+  def config: Config = Config()
   var airlineActor: TestProbe = _
   var airlineBroker: TestProbe = _
 
   override def beforeEach() {
     airlineActor = TestProbe()
-    airlineActors = Map("id" -> airlineActor.ref)
+    airlineActors = Map(1 -> airlineActor.ref)
     airlineBroker = TestProbe()
   }
 
@@ -39,30 +42,32 @@ class RoutesTest extends WordSpec with BeforeAndAfterEach with ScalaFutures
 
       "successfully book seats in specified plane" in {
         val request = HttpRequest(
-          method = HttpMethods.POST,
-          uri = "/0/id/book",
+          method = HttpMethods.PUT,
+          uri = "/0/1/book",
           entity = ticketHttpEntity
         )
         val result = request ~> routes ~> runRoute
+        val expectedAirlineBrokerMsg = GetRequest(AirlineBrokerRequest(1, BookTicketCommand(ticket)))
+        airlineBroker.expectMsg(expectedAirlineBrokerMsg)
+        airlineBroker.reply(Success(BigDecimal.valueOf(200)))
 
         check {
-          status should ===(StatusCodes.Created)
+          status should ===(StatusCodes.OK)
         }(result)
 
-        val expectedAirlineBrokerMsg = AirlineBrokerRequest("id", BookTicketCommand(ticket))
-        airlineBroker.expectMsg(expectedAirlineBrokerMsg)
+
       }
 
       "called with bad broker id" in {
         val request = HttpRequest(
-          method = HttpMethods.POST,
-          uri = "/100/id/book",
+          method = HttpMethods.PUT,
+          uri = "/1/1/book",
           entity = ticketHttpEntity
         )
         val result = request ~> routes ~> runRoute
 
         check {
-          status should ===(StatusCodes.NotFound)
+          status should ===(StatusCodes.ImATeapot)
         }(result)
       }
     }

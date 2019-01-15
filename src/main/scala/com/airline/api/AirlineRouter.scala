@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives.{complete, _}
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
+import com.Config
 import com.airline.domain._
 import com.airline.logic.AirlineBrokerActor.GetRequest
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,24 +19,25 @@ import scala.util.{Failure, Success, Try}
 
 trait AirlineRouter extends JsonSupport {
   def airlineBrokers: Map[Int, ActorRef]
-  def objectMapper = new ObjectMapper()
+  def config: Config
+  def objectMapper: ObjectMapper = new ObjectMapper()
     .registerModule(DefaultScalaModule)
   implicit lazy val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
-  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(10))
+  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(config.routersThreads))
 
   val airlineRoutes: Route =
     pathPrefix(IntNumber) {
       brokerId => {
-        pathPrefix(Segment) {
+        pathPrefix(IntNumber) {
           lineId => {
             path("book") {
-              post {
+              put {
                 entity(as[Ticket]) { ticket =>
                   airlineBrokers.get(brokerId)
                     .map(brokerRef => (brokerRef ? GetRequest(AirlineBrokerRequest(lineId, BookTicketCommand(ticket)))).mapTo[Try[BigDecimal]]
                        .flatMap(Future.fromTry))
                     .map (result =>  onComplete(result) {
-                      case Success(value) => complete(objectMapper.writeValueAsString(value))
+                      case Success(value) => complete(HttpResponse(StatusCodes.OK , entity = objectMapper.writeValueAsString(value)))
                       case Failure(exception) => complete(HttpResponse(StatusCodes.ImATeapot, entity = exception.getMessage))
                     }) match {
                     case Some(a) => a

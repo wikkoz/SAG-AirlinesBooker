@@ -14,10 +14,10 @@ object AirlineActor {
 
   final case class GetAvailableTickets()
 
-  def props: String => Props = (airlineName: String) => Props(new AirlineActor(airlineName))
+  def props: Int => Props = (airlineName: Int) => Props(new AirlineActor(airlineName))
 }
 
-class AirlineActor(airlineName: String) extends Actor with ActorLogging {
+class AirlineActor(airlineName: Int) extends Actor with ActorLogging {
 
   private def initFlights(): List[Flight] = {
     val random = Random
