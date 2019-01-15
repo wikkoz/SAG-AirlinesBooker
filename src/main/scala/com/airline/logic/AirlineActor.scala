@@ -21,7 +21,7 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
 
   private def initFlights(): List[Flight] = {
     val random = Random
-    (10 to random.nextInt(10) + 11).map(i => createFlight(i)).toList
+    (1 to random.nextInt(10) + 1).map(i => createFlight(i)).toList
   }
 
   private def createFlight(id: Int): Flight = {
@@ -30,7 +30,7 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
     val departureCity = cities.head
     val destinationCity = cities(1)
     val price = random.nextInt(4) * 100 + 100
-    val seats = (100 to random.nextInt(100) + 101).map(i => Seat(i, isBooked = false, BigDecimal.valueOf(price))).toList
+    val seats = (1 to random.nextInt(10) + 11).map(i => Seat(i, isBooked = false, BigDecimal.valueOf(price))).toList
     val date = LocalDateTime.now().plusMinutes(random.nextInt(60000))
     Flight(id, seats, departureCity, destinationCity, date)
   }
@@ -72,7 +72,7 @@ class AirlineActor(airlineName: String) extends Actor with ActorLogging {
         seat
       })
 
-    val price = updatedSeats.map(it => it.price).sum
+    val price = ticketSeats.map(it => it.price).sum
 
     val updatedFlight = Flight(flight.flightId, updatedSeats, flight.departureCity, flight.destinationCity, flight.departureTime)
 

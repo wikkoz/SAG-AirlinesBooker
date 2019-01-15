@@ -1,6 +1,6 @@
 import scala.sys.process.Process
 
-lazy val akkaHttpVersion = "10.1.0-RC2"
+lazy val akkaHttpVersion = "10.1.2"
 lazy val akkaVersion    = "2.5.11"
 
 val ng = inputKey[Int]("The angular-cli command.")
@@ -21,7 +21,9 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-stream"          % akkaVersion,
       "com.typesafe.akka" %% "akka-actor"           % akkaVersion,
       "com.typesafe.akka" %% "akka-slf4j"           % akkaVersion,
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8",
       "ch.qos.logback"    %  "logback-classic"      % "1.2.3",
+
 
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,

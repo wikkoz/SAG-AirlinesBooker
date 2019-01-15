@@ -10,6 +10,7 @@ import com.airline.logic.AirlineActor.{GetAvailableTickets, ReserveTicket}
 import com.airline.logic.AirlineBrokerActor.GetRequest
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.util.Try
 
 object AirlineBrokerActor {
 
@@ -21,7 +22,7 @@ object AirlineBrokerActor {
 class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor with ActorLogging {
 
   implicit lazy val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
-  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor)
+  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(10))
 
   override def receive: Receive = {
     case GetRequest(request: AirlineBrokerRequest) =>
@@ -31,7 +32,7 @@ class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor wit
             case GetFlightsCommand() => askForAvailableTickets(airlineActor) pipeTo sender()
             case BookTicketCommand(ticket) => orderTicket(airlineActor, ticket) pipeTo sender()
           }
-        case None => sender ! new RuntimeException("Airline not found")
+        case None =>  Future.failed(new RuntimeException("Airline not found")) pipeTo sender()
       }
   }
 
@@ -39,7 +40,7 @@ class AirlineBrokerActor(airlineActors: Map[String, ActorRef]) extends Actor wit
     (airline ? GetAvailableTickets()).mapTo[List[Flight]]
   }
 
-  private def orderTicket(airline: ActorRef, ticket: Ticket): Future[BigDecimal] = {
-    (airline ? ReserveTicket(ticket)).mapTo[BigDecimal]
+  private def orderTicket(airline: ActorRef, ticket: Ticket): Future[Try[BigDecimal]] = {
+    (airline ? ReserveTicket(ticket)).mapTo[Try[BigDecimal]]
   }
 }
