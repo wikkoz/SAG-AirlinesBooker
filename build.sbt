@@ -24,6 +24,11 @@ lazy val root = (project in file(".")).
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8",
       "ch.qos.logback"    %  "logback-classic"      % "1.2.3",
       "com.github.scopt" %% "scopt" % "3.7.0",
+      
+      "io.gatling" % "gatling-core" % "3.0.2",
+      "io.gatling" % "gatling-http" % "3.0.2",
+      "io.gatling" % "gatling-app" % "3.0.2",
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.0.2",
 
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,
