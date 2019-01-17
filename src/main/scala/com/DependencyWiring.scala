@@ -26,7 +26,8 @@ trait DependencyWiring {
   def system: ActorSystem
   def config: Config
   def executionContext: ExecutionContext
-
-  final val airlineBrokers: Map[Int, ActorRef] = initAirlineBrokersActors()
+  
   final val airlines: Map[Int, ActorRef] = initAirlineActors()
+  final val airlineBrokers: Map[Int, ActorRef] = initAirlineBrokersActors()
+
 }
