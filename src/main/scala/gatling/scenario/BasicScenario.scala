@@ -31,34 +31,6 @@ class BasicScenario extends Simulation {
 
   }
 
-  val numberOfParallelReq = 3
-
-  def generatePageRequest(brokerId: Int): HttpRequestBuilder = {
-
-    val body = StringBody("""{"seats":[8,9],"flightId":1}""")
-
-    http("book page")
-      .put("/api/" + brokerId + "/1/book")
-      .headers(Map(
-        "Accept" -> "application/json, text/javascript, */*; q=0.01",
-        "Content-Type" -> "application/json"))
-      .body(body)
-      .check(status.is(200))
-  }
-
-  def parallelRequests: Seq[HttpRequestBuilder] =
-    (1 until numberOfParallelReq).map(i => generatePageRequest(i))
-
-
-  object BookSeatsInMultipleBrokers {
-    val bookSeats = exec(http("Book seats")
-      .get("/api/1/1/status")
-      .resources(parallelRequests: _*)
-      .check(status.is(200)))
-
-  }
-
-
   val scn = scenario("Basic scenario") // A scenario is a chain of requests and pauses
     .exec(CheckStatus.checkStatus, BookSeats.bookSeats)
 
