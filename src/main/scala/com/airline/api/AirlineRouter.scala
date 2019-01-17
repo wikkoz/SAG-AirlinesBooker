@@ -2,7 +2,7 @@ package com.airline.api
 
 import java.util.concurrent.{Executors, TimeUnit}
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, _}
 import akka.http.scaladsl.server.Route
@@ -38,14 +38,16 @@ trait AirlineRouter extends JsonSupport {
                        .flatMap(Future.fromTry))
                     .map (result =>  onComplete(result) {
                       case Success(value) => complete(HttpResponse(StatusCodes.OK , entity = objectMapper.writeValueAsString(value)))
-                      case Failure(exception) => complete(HttpResponse(StatusCodes.ImATeapot, entity = exception.getMessage))
+                      case Failure(exception) => {
+                        println(exception.getMessage)
+                        complete(HttpResponse(StatusCodes.ImATeapot, entity = exception.getMessage))
+                      }
                     }) match {
                     case Some(a) => a
                     case None => complete(HttpResponse(StatusCodes.ImATeapot,entity = s"Cannot find airline broker with id: $brokerId"))
                   }
                 }
               }
-
             } ~
             path("status") {
               get {
